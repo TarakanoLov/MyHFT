@@ -1,8 +1,10 @@
-#pragma once
+#ifndef SRC_COMMON_MEM_POOL_H
+#define SRC_COMMON_MEM_POOL_H
 
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <type_traits>
 
 #include <common/macros.h>
 
@@ -11,6 +13,7 @@ namespace common {
 template<typename T>
 class MemPool final {
 public:
+    static_assert(std::is_trivial_v<T>);
     explicit MemPool(std::size_t num_elems) :
         store_(num_elems, {T(), true}) /* pre-allocation of vector storage. */ {
       ASSERT(reinterpret_cast<const ObjectBlock *>(&(store_[0].object_)) == &(store_[0]), "T object should be first member of ObjectBlock.");
@@ -22,7 +25,7 @@ public:
         auto obj_block = &(store_[next_free_index_]);
         ASSERT(obj_block->is_free_, "Expected free ObjectBlock at index:" + std::to_string(next_free_index_));
         T *ret = &(obj_block->object_);
-        *ret = T(args...);
+        ret = new(ret) T(args...);
         obj_block->is_free_ = false;
 
         return ret;
@@ -82,3 +85,5 @@ private:
     size_t next_free_index_ = 0;
   };
 }
+
+#endif // SRC_COMMON_MEM_POOL_H
