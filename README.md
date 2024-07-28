@@ -1,6 +1,9 @@
 # MyHFT
 Platform: Ubuntu
 
+## Что не реализовано
+- логгирование
+
 ## How to
 git clone https://github.com/TarakanoLov/MyHFT
 cd MyHFT
